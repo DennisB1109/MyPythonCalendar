@@ -18,3 +18,8 @@ def getCurrYear():
 
 def getDate():
     print("Heutiges datum: %s-%s-%s" % (datetime.datetime.now().day, datetime.datetime.now().month, datetime.datetime.now().year))
+
+getCurrDay()
+getCurrMonth()
+getCurrYear()
+getDate()
