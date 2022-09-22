@@ -1,10 +1,12 @@
 import datetime
-from openpyxl import Workbook, load_workbook
+from uuid import uuid1                                          # To assign each event a unique ID
+from openpyxl import load_workbook
+from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
 print("LETS GET STARTED\n")
 
-def get_CurrDay():
+def get_curr_day():
     """_summary_
 
     Returns:
@@ -15,7 +17,7 @@ def get_CurrDay():
     print("Heute ist der %ste, das ist ein" % (datetime.datetime.now().day), (convert_to_german.get(weekday)))
     return weekday
 
-def get_CurrMonth():
+def get_curr_month():
     """_summary_
 
     Returns:
@@ -27,7 +29,7 @@ def get_CurrMonth():
     return number_of_month
     
 
-def get_CurrYear():
+def get_curr_year():
     """_summary_
 
     Returns:
@@ -36,7 +38,7 @@ def get_CurrYear():
     print("Wir haben das Jahr:", datetime.datetime.now().year)
     return datetime.datetime.now().year
 
-def get_Date():
+def get_date():
     """_summary_
 
     Returns:
@@ -45,10 +47,16 @@ def get_Date():
     print("Heutiges datum: %s-%s-%s" % (datetime.datetime.now().day, datetime.datetime.now().month, datetime.datetime.now().year))
     return datetime.datetime.now().day, datetime.datetime.now().month, datetime.datetime.now().year
 
-def add_Event(): 
+def add_event():
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
     wb = load_workbook('my_Events.xlsx')
     ws = wb.active
     print("Create an Appointment/Event\n")
+    uid = str(uuid1().int>>64)
     day = input("Day: ")
     month = input("Month: ")
     year = input("Year: ")
@@ -58,27 +66,51 @@ def add_Event():
         temp = ''.join(century)
         year = temp
     description = input("Description: ")
-    ws.append([day, month, year, description])
+    ws.append([uid, day, month, year, description])
     wb.save('my_Events.xlsx')
     added_event = f"Your event for the {day}.{month}.{year} was successfully added to your Calendar"
+    print(added_event)
     return added_event
 
 def del_event():
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
     wb = load_workbook('my_Events.xlsx')
     ws = wb.active
     print("Which event should be deleted?\n")
-    day = input("Day: ")
-    month = input("Month: ")
-    year = input("Year: ")
+    uid = input("UniqueID: ")
     temp_list = []
-    for row in range(2,10):
-        print(temp_list)
+    for row in range(2,100):
         temp_list.clear()
-        for col in range (1,5):
-            print(ws[get_column_letter(col) + str(row)].value)
-            temp_list.append(ws[get_column_letter(col) + str(row)].value)
-        if temp_list[0] == day and temp_list[0] == month and temp_list[0] == year:
-            ws.delete_rows(row)
+        temp_list.append(ws[get_column_letter(1) + str(row)].value)
+        if temp_list[0] == uid:
             wb.save('my_Events.xlsx')
+            deleted_day = ws[get_column_letter(2) + str(row)].value
+            deleted_month =ws[get_column_letter(3) + str(row)].value
+            deleted_year =ws[get_column_letter(4) + str(row)].value
+            print(f"Your Event for the {deleted_day}.{deleted_month}.{deleted_year} with the ID {uid} was successfully deleted")
+            ws.delete_rows(row)
+            break
+    return uid
 
-del_event()
+def show_all_events():
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
+    wb = load_workbook('my_Events.xlsx')
+    ws = wb.active    
+    temp_list = []
+    for row in range(3,100):
+        check_empty = ws[get_column_letter(1) + str(row)].value
+        if check_empty is None:
+            break
+        temp_list.clear()
+        for col in range(1,6):
+            temp_list.append(ws[get_column_letter(col) + str(row)].value)
+        print(temp_list)
+    return temp_list
