@@ -3,6 +3,9 @@ from uuid import uuid1                                          # To assign each
 from openpyxl import load_workbook
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
+import sys
+from PySide2.QtWidgets import QApplication, QWidget
+
 
 print("LETS GET STARTED\n")
 
@@ -114,3 +117,13 @@ def show_all_events():
             temp_list.append(ws[get_column_letter(col) + str(row)].value)
         print(temp_list)
     return temp_list
+
+def test_open_window():
+    app = QApplication(sys.argv)
+    mainwindow = QWidget()
+    mainwindow.resize(550, 400)
+    mainwindow.setWindowTitle('Calendar')
+    mainwindow.show()
+    app.exec_()
+
+test_open_window()
