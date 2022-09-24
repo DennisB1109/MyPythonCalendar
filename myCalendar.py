@@ -86,17 +86,21 @@ def del_event():
     print("Which event should be deleted?\n")
     uid = input("UniqueID: ")
     temp_list = []
+    was_event_deleted = False
     for row in range(2,100):
         temp_list.clear()
         temp_list.append(ws[get_column_letter(1) + str(row)].value)
         if temp_list[0] == uid:
-            wb.save('my_Events.xlsx')
             deleted_day = ws[get_column_letter(2) + str(row)].value
             deleted_month =ws[get_column_letter(3) + str(row)].value
             deleted_year =ws[get_column_letter(4) + str(row)].value
             print(f"Your Event for the {deleted_day}.{deleted_month}.{deleted_year} with the ID {uid} was successfully deleted")
             ws.delete_rows(row)
+            wb.save('my_Events.xlsx')
+            was_event_deleted = True
             break
+    if was_event_deleted is False:
+        print(f"There is no event with the ID {uid}")
     return uid
 
 def show_all_events():
@@ -126,4 +130,22 @@ def test_open_window():
     mainwindow.show()
     app.exec_()
 
-test_open_window()
+def main():
+    function = sys.argv[1]
+    if function == "get_curr_day":
+        get_curr_day()
+    if function == "get_curr_month":
+        get_curr_month()
+    if function == "get_curr_year":
+        get_curr_year()
+    if function == "get_date":
+        get_date()
+    if function == "add_event":
+        add_event()
+    if function == "del_event":
+        del_event()
+    if function == "show_all_events":
+        show_all_events()        
+
+if (__name__ == "__main__"):
+     main()
