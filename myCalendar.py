@@ -1,4 +1,5 @@
-import datetime
+from datetime import *
+from datetime import timedelta
 from uuid import uuid1                                          # To assign each event a unique ID
 from openpyxl import load_workbook
 from openpyxl import Workbook
@@ -69,7 +70,8 @@ def add_event():
         temp = ''.join(century)
         year = temp
     description = input("Description: ")
-    ws.append([uid, day, month, year, description])
+    reminder = int(input("How many days before, do you want to get notified?: "))
+    ws.append([uid, day, month, year, description, reminder])
     wb.save('my_Events.xlsx')
     added_event = f"Your event for the {day}.{month}.{year} was successfully added to your Calendar"
     print(added_event)
@@ -122,6 +124,21 @@ def show_all_events():
         print(temp_list)
     return temp_list
 
+# def check_events():
+#     wb = load_workbook('my_Events.xlsx')
+#     ws = wb.active  
+#     for row in range(3, 100):
+#         save_reminder = ws[get_column_letter(6) + str(row)].value
+#         if save_reminder is None:
+#             break
+#         day = datetime.timedelta(days = save_reminder)
+#         get_event_day = ws[get_column_letter(2) + str(row)].value
+#         get_event_month = ws[get_column_letter(3) + str(row)].value
+#         get_event_year = ws[get_column_letter(4) + str(row)].value
+
+#         date_event = f'{}/{}/{}'
+#     return True
+
 def test_open_window():
     app = QApplication(sys.argv)
     mainwindow = QWidget()
@@ -130,22 +147,40 @@ def test_open_window():
     mainwindow.show()
     app.exec_()
 
-def main():
-    function = sys.argv[1]
-    if function == "get_curr_day":
-        get_curr_day()
-    if function == "get_curr_month":
-        get_curr_month()
-    if function == "get_curr_year":
-        get_curr_year()
-    if function == "get_date":
-        get_date()
-    if function == "add_event":
-        add_event()
-    if function == "del_event":
-        del_event()
-    if function == "show_all_events":
-        show_all_events()        
 
-if (__name__ == "__main__"):
-     main()
+# def main():
+#     function = sys.argv[1]
+#     if function == "get_curr_day":
+#         get_curr_day()
+#     if function == "get_curr_month":
+#         get_curr_month()
+#     if function == "get_curr_year":
+#         get_curr_year()
+#     if function == "get_date":
+#         get_date()
+#     if function == "add_event":
+#         add_event()
+#     if function == "del_event":
+#         del_event()
+#     if function == "show_all_events":
+#         show_all_events()        
+
+# if (__name__ == "__main__"):
+#      main()
+
+wb = load_workbook('my_Events.xlsx')
+ws = wb.active  
+for row in range(3, 100):
+    save_reminder = ws[get_column_letter(6) + str(row)].value
+    print(save_reminder)
+    if save_reminder is None:
+        break
+    day = timedelta(days = save_reminder)
+    get_event_day = ws[get_column_letter(2) + str(row)].value
+    get_event_month = ws[get_column_letter(3) + str(row)].value
+    get_event_year = ws[get_column_letter(4) + str(row)].value[0] + ws[get_column_letter(4) + str(row)].value[1]
+    date_event_string = f'{get_event_day}/{get_event_month}/{get_event_year} 00:00:01'
+    date_time_obj = datetime.strptime(date_event_string, '%d/%m/%y %H:%M:%S')
+    print(date_time_obj)
+    test = date_time_obj - day
+    print(test)
