@@ -65,7 +65,7 @@ def add_event():
     month = input("Month: ")
     year = input("Year: ")
     if len(year) == 2:
-        temp = str(datetime.datetime.now().year)
+        temp = str(datetime.now().year)
         century = temp[0] + temp[1] + year
         temp = ''.join(century)
         year = temp
@@ -124,20 +124,35 @@ def show_all_events():
         print(temp_list)
     return temp_list
 
-# def check_events():
-#     wb = load_workbook('my_Events.xlsx')
-#     ws = wb.active  
-#     for row in range(3, 100):
-#         save_reminder = ws[get_column_letter(6) + str(row)].value
-#         if save_reminder is None:
-#             break
-#         day = datetime.timedelta(days = save_reminder)
-#         get_event_day = ws[get_column_letter(2) + str(row)].value
-#         get_event_month = ws[get_column_letter(3) + str(row)].value
-#         get_event_year = ws[get_column_letter(4) + str(row)].value
+def check_events():
+    """_summary_
 
-#         date_event = f'{}/{}/{}'
-#     return True
+    Returns:
+        _type_: _description_
+    """
+    wb = load_workbook('my_Events.xlsx')
+    ws = wb.active
+    upcoming_events = False
+    for row in range(3, 100):
+        save_reminder = ws[get_column_letter(6) + str(row)].value
+        if save_reminder is None:
+            break
+        day = timedelta(days = save_reminder)
+        get_event_day = ws[get_column_letter(2) + str(row)].value
+        get_event_month = ws[get_column_letter(3) + str(row)].value
+        get_event_year = ws[get_column_letter(4) + str(row)].value[2] + ws[get_column_letter(4) + str(row)].value[3]
+        date_event_string = f'{get_event_day}/{get_event_month}/{get_event_year} 00:00:01'
+        date_time_obj = datetime.strptime(date_event_string, '%d/%m/%y %H:%M:%S')
+        
+        remind_on_this_date = str(date_time_obj - day)
+
+        remind_on_this_date = remind_on_this_date[:-9].strip()
+        temp_datetime_now = str(datetime.now())[:-16].strip()
+        
+        if temp_datetime_now == remind_on_this_date:
+            print(f"{ws[get_column_letter(5) + str(row)].value} in {save_reminder} days")
+            upcoming_events = True
+    return upcoming_events
 
 def test_open_window():
     app = QApplication(sys.argv)
@@ -168,19 +183,4 @@ def test_open_window():
 # if (__name__ == "__main__"):
 #      main()
 
-wb = load_workbook('my_Events.xlsx')
-ws = wb.active  
-for row in range(3, 100):
-    save_reminder = ws[get_column_letter(6) + str(row)].value
-    print(save_reminder)
-    if save_reminder is None:
-        break
-    day = timedelta(days = save_reminder)
-    get_event_day = ws[get_column_letter(2) + str(row)].value
-    get_event_month = ws[get_column_letter(3) + str(row)].value
-    get_event_year = ws[get_column_letter(4) + str(row)].value[0] + ws[get_column_letter(4) + str(row)].value[1]
-    date_event_string = f'{get_event_day}/{get_event_month}/{get_event_year} 00:00:01'
-    date_time_obj = datetime.strptime(date_event_string, '%d/%m/%y %H:%M:%S')
-    print(date_time_obj)
-    test = date_time_obj - day
-    print(test)
+check_events()
