@@ -5,7 +5,8 @@ from openpyxl import load_workbook
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 import sys
-from PySide2.QtWidgets import QApplication, QWidget
+from PySide2.QtWidgets import QApplication, QWidget, QPushButton
+from PySide2.QtGui import QIcon
 
 
 print("LETS GET STARTED\n")
@@ -154,13 +155,38 @@ def check_events():
             upcoming_events = True
     return upcoming_events
 
-def test_open_window():
-    app = QApplication(sys.argv)
-    mainwindow = QWidget()
-    mainwindow.resize(550, 400)
-    mainwindow.setWindowTitle('Calendar')
-    mainwindow.show()
-    app.exec_()
+class Window(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Calendar")
+        self.setGeometry(300, 300, 300, 300)
+        self.resize(550, 400)
+
+        self.setIcon()
+        self.setButton()
+    
+    def setIcon(self):
+        appIcon = QIcon("Apple_Calendar_Icon.png")
+        self.setWindowIcon(appIcon)
+    
+    def setButton(self):
+        btn1 = QPushButton("Click Me!", self)
+
+app = QApplication(sys.argv)
+mainwindow = Window()
+mainwindow.show()
+app.exec_()
+
+
+# def test_open_window():
+#     app = QApplication(sys.argv)
+#     mainwindow = QWidget()
+#     mainwindow.resize(550, 400)
+#     mainwindow.setWindowTitle('Calendar')
+#     mainwindow.show()
+#     app.exec_()
+
 
 
 # def main():
@@ -182,5 +208,3 @@ def test_open_window():
 
 # if (__name__ == "__main__"):
 #      main()
-
-check_events()
