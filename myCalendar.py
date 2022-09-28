@@ -1,5 +1,6 @@
 from datetime import *
 from datetime import timedelta
+from distutils.filelist import glob_to_re
 from uuid import uuid1                                          # To assign each event a unique ID
 from openpyxl import load_workbook
 from openpyxl import Workbook
@@ -154,93 +155,102 @@ def check_events():
             upcoming_events = True
     return upcoming_events
 
-def test_window_gui():
+def test_gui():
+    """_summary_
+    """
     root = Tk()
-    
+
     display_date = get_date()
     my_label = Label(root, text=('Date', display_date))
     my_label.place(relx=0.0, rely=0.0, anchor='nw')
 
-    def do_an_entry():
-        valid_test1 = True
-        test1 = entry_day.get()
-        valid_test2 = True
-        test2 = entry_month.get()
-        valid_test3 = True
-        test3 = entry_year.get()
+    invalid_label = Label(root)
+    my_label_added_event = Label(root)
 
-        for character in test1:
+    def do_an_entry():
+        valid_day = True
+        day_value = entry_day.get()
+        valid_month = True
+        month_value = entry_month.get()
+        valid_year = True
+        year_value = entry_year.get()
+        description_value = entry_description.get()
+        
+        for character in day_value:
             try:
                 converted_character = int(character)
                 #print(type(converted_character))
                 if converted_character not in range(0, 10):
                     print("Invalid input")
-                    valid_test1 = False
-                if len(test1) > 2:
+                    valid_day = False
+                if len(day_value) > 2:
                     print("Invalid input")
-                    valid_test1 = False
+                    valid_day = False
             except ValueError:
                 print("Invalid input")
-                valid_test1 = False
+                valid_day = False
                 pass
         
-        for character in test2:
+        for character in month_value:
             try:
                 converted_character = int(character)
                 if converted_character not in range(0, 10):
-                    print("Invalid input Test2")
-                    valid_test2 = False
-                if len(test2) > 2:
+                    print("Invalid input month_value")
+                    valid_month = False
+                if len(month_value) > 2:
                     print("Invalid input")
-                    valid_test2 = False
+                    valid_month = False
             except ValueError:
                 print("Invalid input")
-                valid_test2 = False
+                valid_month = False
                 pass
         
-        for character in test3:
+        for character in year_value:
             try:
                 converted_character = int(character)
                 if converted_character not in range(0, 10):
-                    print("Invalid input Test3")
-                    valid_test3 = False
-                if len(test3) > 4:
+                    print("Invalid input year_value")
+                    valid_year = False
+                if len(year_value) > 4 or len(year_value) < 2 or len(year_value) == 3:
                     print("Invalid input")
-                    valid_test3 = False
+                    valid_year = False
             except ValueError:
                 print("Invalid input")
-                valid_test2 = False
+                valid_year = False
                 pass
 
-        if valid_test1 is True and valid_test2 is True and valid_test3 is True:
-            my_label1 = Label(root, text=test1)
-            my_label1.pack()
-
-            my_label2 = Label(root, text=test2)
-            my_label2.pack()
-
-            my_label3 = Label(root, text=test3)
-            my_label3.pack()
+        if valid_day is True and valid_month is True and valid_year is True:
+            success_label = f'Your event "{description_value}" for the {day_value}.{month_value}.{year_value} was successfully added'
+            nonlocal my_label_added_event
+            my_label_added_event.destroy()
+            nonlocal invalid_label
+            invalid_label.destroy()
+            my_label_added_event = Label(root, text=success_label)
+            my_label_added_event.place(x=5, y=200)
         else:
+            invalid_label.destroy()
+            my_label_added_event.destroy()
             invalid_label = Label(root, text='Invalid Input')
-            invalid_label.pack()
-    
+            invalid_label.place(x=5, y=200)
+
     entry_day = Entry(root)
     entry_day.place(x=5, y=60)
     entry_month = Entry(root)
     entry_month.place(x=5, y=82)
     entry_year = Entry(root)
     entry_year.place(x=5, y=104)
-    
+    entry_description = Entry(root)
+    entry_description.place(height=40 ,x=5, y=126)
+
     submit_event = Button(root, text="Add Event", padx=8, pady=3, command=do_an_entry)
-    submit_event.place(x=5, y=126)
+    submit_event.place(x=5, y=168)
 
     root.title('Calendar')
     root.iconbitmap('Apple_Calendar_Icon.png')
     root.geometry("500x400")
     root.mainloop()
 
-test_window_gui()
+test_gui()
 
 # def main():
 #     function = sys.argv[1]
