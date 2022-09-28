@@ -5,8 +5,7 @@ from openpyxl import load_workbook
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 import sys
-from PySide2.QtWidgets import QApplication, QWidget, QPushButton
-from PySide2.QtGui import QIcon
+from tkinter import *
 
 
 print("LETS GET STARTED\n")
@@ -49,8 +48,8 @@ def get_date():
     Returns:
         _type_: _description_
     """
-    print("Heutiges datum: %s-%s-%s" % (datetime.datetime.now().day, datetime.datetime.now().month, datetime.datetime.now().year))
-    return datetime.datetime.now().day, datetime.datetime.now().month, datetime.datetime.now().year
+    print("Heutiges datum: %s-%s-%s" % (datetime.now().day, datetime.now().month, datetime.now().year))
+    return f'{datetime.now().day}.{datetime.now().month}.{datetime.now().year}'
 
 def add_event():
     """_summary_
@@ -155,39 +154,93 @@ def check_events():
             upcoming_events = True
     return upcoming_events
 
-class Window(QWidget):
-    def __init__(self):
-        super().__init__()
-
-        self.setWindowTitle("Calendar")
-        self.setGeometry(300, 300, 300, 300)
-        self.resize(550, 400)
-
-        self.setIcon()
-        self.setButton()
+def test_window_gui():
+    root = Tk()
     
-    def setIcon(self):
-        appIcon = QIcon("Apple_Calendar_Icon.png")
-        self.setWindowIcon(appIcon)
+    display_date = get_date()
+    my_label = Label(root, text=('Date', display_date))
+    my_label.place(relx=0.0, rely=0.0, anchor='nw')
+
+    def do_an_entry():
+        valid_test1 = True
+        test1 = entry_day.get()
+        valid_test2 = True
+        test2 = entry_month.get()
+        valid_test3 = True
+        test3 = entry_year.get()
+
+        for character in test1:
+            try:
+                converted_character = int(character)
+                #print(type(converted_character))
+                if converted_character not in range(0, 10):
+                    print("Invalid input")
+                    valid_test1 = False
+                if len(test1) > 2:
+                    print("Invalid input")
+                    valid_test1 = False
+            except ValueError:
+                print("Invalid input")
+                valid_test1 = False
+                pass
+        
+        for character in test2:
+            try:
+                converted_character = int(character)
+                if converted_character not in range(0, 10):
+                    print("Invalid input Test2")
+                    valid_test2 = False
+                if len(test2) > 2:
+                    print("Invalid input")
+                    valid_test2 = False
+            except ValueError:
+                print("Invalid input")
+                valid_test2 = False
+                pass
+        
+        for character in test3:
+            try:
+                converted_character = int(character)
+                if converted_character not in range(0, 10):
+                    print("Invalid input Test3")
+                    valid_test3 = False
+                if len(test3) > 4:
+                    print("Invalid input")
+                    valid_test3 = False
+            except ValueError:
+                print("Invalid input")
+                valid_test2 = False
+                pass
+
+        if valid_test1 is True and valid_test2 is True and valid_test3 is True:
+            my_label1 = Label(root, text=test1)
+            my_label1.pack()
+
+            my_label2 = Label(root, text=test2)
+            my_label2.pack()
+
+            my_label3 = Label(root, text=test3)
+            my_label3.pack()
+        else:
+            invalid_label = Label(root, text='Invalid Input')
+            invalid_label.pack()
     
-    def setButton(self):
-        btn1 = QPushButton("Click Me!", self)
+    entry_day = Entry(root)
+    entry_day.place(x=5, y=60)
+    entry_month = Entry(root)
+    entry_month.place(x=5, y=82)
+    entry_year = Entry(root)
+    entry_year.place(x=5, y=104)
+    
+    submit_event = Button(root, text="Add Event", padx=8, pady=3, command=do_an_entry)
+    submit_event.place(x=5, y=126)
 
-app = QApplication(sys.argv)
-mainwindow = Window()
-mainwindow.show()
-app.exec_()
+    root.title('Calendar')
+    root.iconbitmap('Apple_Calendar_Icon.png')
+    root.geometry("500x400")
+    root.mainloop()
 
-
-# def test_open_window():
-#     app = QApplication(sys.argv)
-#     mainwindow = QWidget()
-#     mainwindow.resize(550, 400)
-#     mainwindow.setWindowTitle('Calendar')
-#     mainwindow.show()
-#     app.exec_()
-
-
+test_window_gui()
 
 # def main():
 #     function = sys.argv[1]
