@@ -1,6 +1,7 @@
 from datetime import *
 from datetime import timedelta
 from distutils.filelist import glob_to_re
+from turtle import bgcolor, color
 from uuid import uuid1                                          # To assign each event a unique ID
 from openpyxl import load_workbook
 from openpyxl import Workbook
@@ -52,7 +53,7 @@ def get_date():
     print("Heutiges datum: %s-%s-%s" % (datetime.now().day, datetime.now().month, datetime.now().year))
     return f'{datetime.now().day}.{datetime.now().month}.{datetime.now().year}'
 
-def add_event():
+def add_event(day: str, month: str, year: str, description: str, reminder: str):
     """_summary_
 
     Returns:
@@ -62,16 +63,16 @@ def add_event():
     ws = wb.active
     print("Create an Appointment/Event\n")
     uid = str(uuid1().int>>64)
-    day = input("Day: ")
-    month = input("Month: ")
-    year = input("Year: ")
+    #day = input("Day: ")
+    #month = input("Month: ")
+    #year = input("Year: ")
     if len(year) == 2:
         temp = str(datetime.now().year)
         century = temp[0] + temp[1] + year
         temp = ''.join(century)
         year = temp
-    description = input("Description: ")
-    reminder = int(input("How many days before, do you want to get notified?: "))
+    #description = input("Description: ")
+    #reminder = int(input("How many days before, do you want to get notified?: "))
     ws.append([uid, day, month, year, description, reminder])
     wb.save('my_Events.xlsx')
     added_event = f"Your event for the {day}.{month}.{year} was successfully added to your Calendar"
@@ -175,15 +176,24 @@ def test_gui():
         valid_year = True
         year_value = entry_year.get()
         description_value = entry_description.get()
+        valid_reminder = True
+        reminder_value = entry_reminder.get()
+
+        # After the Add Event button is pressed, the current entries get deleted
+        entry_day.delete(0, "end")
+        entry_month.delete(0, "end")
+        entry_year.delete(0, "end")
+        entry_description.delete(0, "end")
+        entry_reminder.delete(0, "end")
         
         for character in day_value:
             try:
                 converted_character = int(character)
                 #print(type(converted_character))
-                if converted_character not in range(0, 10):
+                if converted_character not in range(0, 10) or int(day_value) > 31:
                     print("Invalid input")
                     valid_day = False
-                if len(day_value) > 2:
+                if len(day_value) > 2 or len(day_value) == 0:
                     print("Invalid input")
                     valid_day = False
             except ValueError:
@@ -194,10 +204,10 @@ def test_gui():
         for character in month_value:
             try:
                 converted_character = int(character)
-                if converted_character not in range(0, 10):
+                if converted_character not in range(0, 10) or int(month_value) > 12:
                     print("Invalid input month_value")
                     valid_month = False
-                if len(month_value) > 2:
+                if len(month_value) > 2 or len(month_value) == 0:
                     print("Invalid input")
                     valid_month = False
             except ValueError:
@@ -211,39 +221,79 @@ def test_gui():
                 if converted_character not in range(0, 10):
                     print("Invalid input year_value")
                     valid_year = False
-                if len(year_value) > 4 or len(year_value) < 2 or len(year_value) == 3:
+                if len(year_value) > 4 or len(year_value) < 2 or len(year_value) == 3 or len(year_value) == 0:
                     print("Invalid input")
                     valid_year = False
             except ValueError:
                 print("Invalid input")
                 valid_year = False
                 pass
+        
+        for character in reminder_value:
+            try:
+                converted_character = int(character)
+                if converted_character not in range(0, 10):
+                    print("Invalid input year_value")
+                    valid_reminder = False
+                if len(reminder_value) == 0:
+                    print("Invalid input")
+                    valid_reminder = False
+            except ValueError:
+                print("Invalid input")
+                valid_reminder = False
+                pass
 
-        if valid_day is True and valid_month is True and valid_year is True:
-            success_label = f'Your event "{description_value}" for the {day_value}.{month_value}.{year_value} was successfully added'
+        if valid_day is True and valid_month is True and valid_year is True and valid_reminder is True:
+            success_label = f'Your event "{description_value}" for the {day_value}.{month_value}.{year_value} was successfully added\nYou will get notified {reminder_value} days before'
             nonlocal my_label_added_event
             my_label_added_event.destroy()
             nonlocal invalid_label
             invalid_label.destroy()
             my_label_added_event = Label(root, text=success_label)
-            my_label_added_event.place(x=5, y=200)
+            my_label_added_event.place(x=5, y=225)
         else:
             invalid_label.destroy()
             my_label_added_event.destroy()
             invalid_label = Label(root, text='Invalid Input')
-            invalid_label.place(x=5, y=200)
+            invalid_label.place(x=5, y=225)
 
+    def temp_text(e):
+        entry_day.delete(0, "end")
+        entry_month.delete(0, "end")
+        entry_year.delete(0, "end")
+        entry_description.delete(0, "end")
+        entry_reminder.delete(0, "end")
+
+    label_day = Label(root, text="Day")
+    label_day.place(x=5, y=60)
     entry_day = Entry(root)
-    entry_day.place(x=5, y=60)
+    entry_day.insert(0,"11")                                # Preview Text
+    entry_day.place(x=75, y=60)
+    label_month = Label(root, text="Month")
+    label_month.place(x=5, y=82)
     entry_month = Entry(root)
-    entry_month.place(x=5, y=82)
+    entry_month.insert(0, "09")                             # Preview Text
+    entry_month.place(x=75, y=82)
+    label_year = Label(root, text="Year")
+    label_year.place(x=5, y=104)
     entry_year = Entry(root)
-    entry_year.place(x=5, y=104)
+    entry_year.insert(0, "2064")                            # Preview Text
+    entry_year.place(x=75, y=104)
+    label_description = Label(root, text="Description")
+    label_description.place(x=5, y=126)
     entry_description = Entry(root)
-    entry_description.place(height=40 ,x=5, y=126)
+    entry_description.insert(0, "Dennis 63th Bday")         # Preview Text
+    entry_description.place(height=40 ,x=75, y=126)
+    label_reminder = Label(root, text="Reminder")
+    label_reminder.place(x=5, y=168)
+    entry_reminder = Entry(root)
+    entry_reminder.insert(0, "5")                           # Preview Text
+    entry_reminder.place(width=40, x=75, y= 168)
 
     submit_event = Button(root, text="Add Event", padx=8, pady=3, command=do_an_entry)
-    submit_event.place(x=5, y=168)
+    submit_event.place(x=75, y=193)
+
+    entry_day.bind("<FocusIn>", temp_text)
 
     root.title('Calendar')
     root.iconbitmap('Apple_Calendar_Icon.png')
@@ -271,5 +321,3 @@ test_gui()
 
 # if (__name__ == "__main__"):
 #      main()
-
-print("Second Test")
