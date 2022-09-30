@@ -1,5 +1,6 @@
 from datetime import *
 from datetime import timedelta
+from distutils.command import check
 from distutils.filelist import glob_to_re
 from turtle import bgcolor, color
 from uuid import uuid1                                          # To assign each event a unique ID
@@ -139,7 +140,7 @@ def check_events():
         save_reminder = ws[get_column_letter(6) + str(row)].value
         if save_reminder is None:
             break
-        day = timedelta(days = save_reminder)
+        day = timedelta(days = int(save_reminder))
         get_event_day = ws[get_column_letter(2) + str(row)].value
         get_event_month = ws[get_column_letter(3) + str(row)].value
         get_event_year = ws[get_column_letter(4) + str(row)].value[2] + ws[get_column_letter(4) + str(row)].value[3]
@@ -165,6 +166,12 @@ def test_gui():
     my_label = Label(root, text=('Date', display_date))
     my_label.place(relx=0.0, rely=0.0, anchor='nw')
 
+    appointment_label = Label(root, text=('Create an Appointment/Event'))
+    appointment_label.place(x=38, y=35)
+
+    delete_label = Label(root, text='Delete an Appointment/Event')
+    delete_label.place(x=329, y=35)
+
     invalid_label = Label(root)
     my_label_added_event = Label(root)
 
@@ -178,6 +185,8 @@ def test_gui():
         description_value = entry_description.get()
         valid_reminder = True
         reminder_value = entry_reminder.get()
+        
+        add_event(day_value, month_value, year_value, description_value, reminder_value)
 
         # After the Add Event button is pressed, the current entries get deleted
         entry_day.delete(0, "end")
@@ -257,13 +266,36 @@ def test_gui():
             invalid_label = Label(root, text='Invalid Input')
             invalid_label.place(x=5, y=225)
 
-    def temp_text(e):
+    def delete_an_entry():
+        valid_id = True
+        id_value = entry_id.get()
+
+        # After the Delete Event button is pressed, the current entries get deleted
+        entry_id.delete(0, "end")
+
+        for character in id_value:
+            try:
+                converted_character = int(character)
+                #print(type(converted_character))
+                if converted_character not in range(0, 10):
+                    print("Invalid input")
+                    valid_id = False
+            except ValueError:
+                print("Invalid input")
+                valid_day = False
+                pass
+
+    def event_text(e):
         entry_day.delete(0, "end")
         entry_month.delete(0, "end")
         entry_year.delete(0, "end")
         entry_description.delete(0, "end")
         entry_reminder.delete(0, "end")
+    
+    def delete_text(e):
+        entry_id.delete(0, "end")
 
+    # Form to create an Event
     label_day = Label(root, text="Day")
     label_day.place(x=5, y=60)
     entry_day = Entry(root)
@@ -293,7 +325,19 @@ def test_gui():
     submit_event = Button(root, text="Add Event", padx=8, pady=3, command=do_an_entry)
     submit_event.place(x=75, y=193)
 
-    entry_day.bind("<FocusIn>", temp_text)
+    entry_day.bind("<FocusIn>", event_text)
+
+    # Form to delete an Event
+    label_id = Label(root, text="Event ID")
+    label_id.place(x=320, y=60)
+    entry_id = Entry(root)
+    entry_id.insert(0,"3067211771744094029")                                # Preview Text
+    entry_id.place(x=370, y=60)
+
+    submit_delete = Button(root, text="Delete Event", padx=8, pady=3, command=delete_an_entry)
+    submit_delete.place(x=400, y=85)
+
+    entry_id.bind("<FocusIn>", delete_text)
 
     root.title('Calendar')
     root.iconbitmap('Apple_Calendar_Icon.png')
