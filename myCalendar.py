@@ -2,6 +2,7 @@ from datetime import *
 from datetime import timedelta
 from distutils.command import check
 from distutils.filelist import glob_to_re
+from msilib import type_binary
 from turtle import bgcolor, color
 from uuid import uuid1                                          # To assign each event a unique ID
 from openpyxl import load_workbook
@@ -80,7 +81,7 @@ def add_event(day: str, month: str, year: str, description: str, reminder: str):
     print(added_event)
     return added_event
 
-def del_event():
+def del_event(uid: str):
     """_summary_
 
     Returns:
@@ -89,7 +90,7 @@ def del_event():
     wb = load_workbook('my_Events.xlsx')
     ws = wb.active
     print("Which event should be deleted?\n")
-    uid = input("UniqueID: ")
+    #uid = input("UniqueID: ")
     temp_list = []
     was_event_deleted = False
     for row in range(2,100):
@@ -175,6 +176,9 @@ def test_gui():
     invalid_label = Label(root)
     my_label_added_event = Label(root)
 
+    invalid_delete_label = Label(root)
+    my_label_deleted_event = Label(root)
+
     def do_an_entry():
         valid_day = True
         day_value = entry_day.get()
@@ -185,8 +189,6 @@ def test_gui():
         description_value = entry_description.get()
         valid_reminder = True
         reminder_value = entry_reminder.get()
-        
-        add_event(day_value, month_value, year_value, description_value, reminder_value)
 
         # After the Add Event button is pressed, the current entries get deleted
         entry_day.delete(0, "end")
@@ -195,28 +197,36 @@ def test_gui():
         entry_description.delete(0, "end")
         entry_reminder.delete(0, "end")
         
+        if day_value == "":
+            print("Invalid input")
+            valid_day = False
         for character in day_value:
+            print("Reached loop")
             try:
                 converted_character = int(character)
-                #print(type(converted_character))
                 if converted_character not in range(0, 10) or int(day_value) > 31:
                     print("Invalid input")
                     valid_day = False
-                if len(day_value) > 2 or len(day_value) == 0:
+                if len(day_value) > 2:
+                    print("Length Error")
                     print("Invalid input")
                     valid_day = False
             except ValueError:
+                print("Value Error")
                 print("Invalid input")
                 valid_day = False
                 pass
         
+        if month_value == "":
+            print("Invalid input")
+            valid_month = False
         for character in month_value:
             try:
                 converted_character = int(character)
                 if converted_character not in range(0, 10) or int(month_value) > 12:
                     print("Invalid input month_value")
                     valid_month = False
-                if len(month_value) > 2 or len(month_value) == 0:
+                if len(month_value) > 2 or len(month_value) == 0 or month_value is None:
                     print("Invalid input")
                     valid_month = False
             except ValueError:
@@ -224,28 +234,31 @@ def test_gui():
                 valid_month = False
                 pass
         
+        if year_value == "":
+            print("Invalid input")
+            valid_year = False
         for character in year_value:
             try:
                 converted_character = int(character)
                 if converted_character not in range(0, 10):
                     print("Invalid input year_value")
                     valid_year = False
-                if len(year_value) > 4 or len(year_value) < 2 or len(year_value) == 3 or len(year_value) == 0:
+                if len(year_value) > 4 or len(year_value) < 2 or len(year_value) == 3 or len(year_value) == 0 or not year_value:
                     print("Invalid input")
                     valid_year = False
             except ValueError:
                 print("Invalid input")
                 valid_year = False
                 pass
+        print(f"Type of empty is: {type(year_value)} and value is: {year_value}")
         
+        if reminder_value == "":
+            reminder_value = "0"
         for character in reminder_value:
             try:
                 converted_character = int(character)
                 if converted_character not in range(0, 10):
                     print("Invalid input year_value")
-                    valid_reminder = False
-                if len(reminder_value) == 0:
-                    print("Invalid input")
                     valid_reminder = False
             except ValueError:
                 print("Invalid input")
@@ -260,6 +273,7 @@ def test_gui():
             invalid_label.destroy()
             my_label_added_event = Label(root, text=success_label)
             my_label_added_event.place(x=5, y=225)
+            add_event(day_value, month_value, year_value, description_value, reminder_value)
         else:
             invalid_label.destroy()
             my_label_added_event.destroy()
@@ -284,6 +298,36 @@ def test_gui():
                 print("Invalid input")
                 valid_day = False
                 pass
+
+        if valid_id is True:
+            wb = load_workbook('my_Events.xlsx')
+            ws = wb.active
+            temp_list = []
+            for row in range(3,100):
+                check_id = ws[get_column_letter(1) + str(row)].value
+                if check_id is None:
+                    print(f"Event with the id {id_value} could not be found")
+                    break
+                if check_id == id_value:
+                    temp_list.append(ws[get_column_letter(2) + str(row)].value)
+                    temp_list.append(ws[get_column_letter(3) + str(row)].value)
+                    temp_list.append(ws[get_column_letter(4) + str(row)].value)
+                    temp_list.append(ws[get_column_letter(5) + str(row)].value)
+                    break
+            if temp_list == []:
+                nonlocal invalid_delete_label
+                invalid_delete_label.destroy()
+                nonlocal my_label_deleted_event
+                my_label_deleted_event.destroy()
+                invalid_delete_label = Label(root, text=f"Event with the id\n{id_value}\ncould not be found")
+                invalid_delete_label.place(x=390, y=120)
+            else:
+                invalid_delete_label.destroy()
+                my_label_deleted_event.destroy()
+                my_label_deleted_event = Label(root, text=f"Your event {temp_list[3]}\nfor the {temp_list[0]}.{temp_list[1]}.{temp_list[2]}\nwas successfully deleted")
+                my_label_deleted_event.place(x=350, y=120)
+                del_event(id_value)
+            
 
     def event_text(e):
         entry_day.delete(0, "end")
