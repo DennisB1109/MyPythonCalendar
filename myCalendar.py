@@ -122,10 +122,10 @@ def show_all_events():
         check_empty = ws[get_column_letter(1) + str(row)].value
         if check_empty is None:
             break
-        temp_list.clear()
-        for col in range(1,6):
+        #temp_list.clear()
+        for col in range(1,7):
             temp_list.append(ws[get_column_letter(col) + str(row)].value)
-        print(temp_list)
+        #print(temp_list)
     return temp_list
 
 def check_events():
@@ -383,10 +383,27 @@ def test_gui():
 
     entry_id.bind("<FocusIn>", delete_text)
 
+    def show_events():
+        events = show_all_events()
+        counter = 0
+        i = 6
+        while i < len(events):
+            events.insert(i, r'\n')
+            i += 7
+        print("Events after loop: ", events)
+        events = ''.join(str(e) for e in events)                                            # ToDo
+        print("Events after join: ", events)
+        label_events = Label(root, text=events)
+        label_events.pack()
+
+    show_events_button = Button(root, text="Show all events", padx=8, pady=3, command=show_events)
+    show_events_button.place(x=20, y=300)
+
     root.title('Calendar')
     root.iconbitmap('Apple_Calendar_Icon.png')
     root.geometry("500x400")
     root.mainloop()
+
 
 test_gui()
 
