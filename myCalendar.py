@@ -384,23 +384,26 @@ def test_gui():
     entry_id.bind("<FocusIn>", delete_text)
 
     def show_events():
+        event_window = Toplevel()
+        event_window.title('Calendar/Events')
+        event_window.iconbitmap('Apple_Calendar_Icon.ico')
+        
         events = show_all_events()
-        counter = 0
-        i = 6
-        while i < len(events):
-            events.insert(i, r'\n')
-            i += 7
-        print("Events after loop: ", events)
-        events = ''.join(str(e) for e in events)                                            # ToDo
-        print("Events after join: ", events)
-        label_events = Label(root, text=events)
-        label_events.pack()
+        print("Events: ", events)
+        num_of_events = len(events)//6
+        print("Number of Events", num_of_events)
+        event_dict = {}
+        for event in range(1, num_of_events+1):
+            temp = str("ID: " + events[0]) + "  Day: " + str(events[1]) + "  Month: " + str(events[2]) + "  Year: " + str(events[3]) + "  Description: " + str(events[4]) + "  Reminder: " + str(events[5])
+            del events[:6]
+            event_dict[f"Event{0}".format(event)] = Label(event_window, text=temp)
+            event_dict[f"Event{0}".format(event)].pack()
 
     show_events_button = Button(root, text="Show all events", padx=8, pady=3, command=show_events)
     show_events_button.place(x=20, y=300)
 
     root.title('Calendar')
-    root.iconbitmap('Apple_Calendar_Icon.png')
+    root.iconbitmap('Apple_Calendar_Icon.ico')
     root.geometry("500x400")
     root.mainloop()
 
