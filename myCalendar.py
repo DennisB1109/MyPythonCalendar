@@ -290,7 +290,6 @@ def test_gui():
         for character in id_value:
             try:
                 converted_character = int(character)
-                #print(type(converted_character))
                 if converted_character not in range(0, 10):
                     print("Invalid input")
                     valid_id = False
@@ -370,6 +369,27 @@ def test_gui():
     submit_event.place(x=75, y=193)
 
     entry_day.bind("<FocusIn>", event_text)
+    
+    def lossfocus(event):
+        if event.widget is root:
+            w = Toplevel.tk.call('focus')
+            if not w:
+                Toplevel.destroy()
+
+    def input_date_menu():
+        mini_calendar_window = Toplevel()
+        mini_calendar_temp_label = Label(mini_calendar_window, text="Menu")
+        mini_calendar_temp_label.pack()
+        mini_calendar_window.geometry("150x180")
+        mini_calendar_window.overrideredirect(True)
+
+        mini_calendar_window.bind('<FocusOut>', lossfocus)
+
+    input_date_btn = Button(root)
+    photo = PhotoImage(file="calendar_button.png")
+    input_date_btn.config(image= photo, width= "17", height= "16", activeforeground= "black", bg= "black", bd=0, command=input_date_menu)
+    input_date_btn.place(x=205, y=105)
+
 
     # Form to delete an Event
     label_id = Label(root, text="Event ID")
@@ -389,9 +409,7 @@ def test_gui():
         event_window.iconbitmap('Apple_Calendar_Icon.ico')
         
         events = show_all_events()
-        print("Events: ", events)
         num_of_events = len(events)//6
-        print("Number of Events", num_of_events)
         event_dict = {}
         for event in range(1, num_of_events+1):
             temp = str("ID: " + events[0]) + "  Day: " + str(events[1]) + "  Month: " + str(events[2]) + "  Year: " + str(events[3]) + "  Description: " + str(events[4]) + "  Reminder: " + str(events[5])
@@ -409,23 +427,6 @@ def test_gui():
 
 
 test_gui()
-
-# def main():
-#     function = sys.argv[1]
-#     if function == "get_curr_day":
-#         get_curr_day()
-#     if function == "get_curr_month":
-#         get_curr_month()
-#     if function == "get_curr_year":
-#         get_curr_year()
-#     if function == "get_date":
-#         get_date()
-#     if function == "add_event":
-#         add_event()
-#     if function == "del_event":
-#         del_event()
-#     if function == "show_all_events":
-#         show_all_events()        
 
 # if (__name__ == "__main__"):
 #      main()
