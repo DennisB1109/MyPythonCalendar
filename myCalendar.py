@@ -11,7 +11,6 @@ from openpyxl.utils import get_column_letter
 import sys
 from tkinter import *
 
-
 print("LETS GET STARTED\n")
 
 def get_curr_day():
@@ -134,9 +133,11 @@ def check_events():
     Returns:
         _type_: _description_
     """
+    upcoming_event_date_list = []
+    upcoming_event_description_list = []
+    upcoming_event_reminder_list = []
     wb = load_workbook('my_Events.xlsx')
     ws = wb.active
-    upcoming_events = False
     for row in range(3, 100):
         save_reminder = ws[get_column_letter(6) + str(row)].value
         if save_reminder is None:
@@ -145,6 +146,7 @@ def check_events():
         get_event_day = ws[get_column_letter(2) + str(row)].value
         get_event_month = ws[get_column_letter(3) + str(row)].value
         get_event_year = ws[get_column_letter(4) + str(row)].value[2] + ws[get_column_letter(4) + str(row)].value[3]
+        get_event_description = ws[get_column_letter(5) + str(row)].value
         date_event_string = f'{get_event_day}/{get_event_month}/{get_event_year} 00:00:01'
         date_time_obj = datetime.strptime(date_event_string, '%d/%m/%y %H:%M:%S')
         
@@ -155,8 +157,12 @@ def check_events():
         
         if temp_datetime_now == remind_on_this_date:
             print(f"{ws[get_column_letter(5) + str(row)].value} in {save_reminder} days")
-            upcoming_events = True
-    return upcoming_events
+            date_event_string = date_event_string[:len(date_event_string) - 9]
+            date_event_string = date_event_string.replace(r"/", ".")
+            upcoming_event_date_list.append(date_event_string)
+            upcoming_event_description_list.append(get_event_description)
+            upcoming_event_reminder_list.append(save_reminder)
+    return upcoming_event_description_list, upcoming_event_reminder_list
 
 def test_gui():
     """_summary_
@@ -166,6 +172,17 @@ def test_gui():
     display_date = get_date()
     my_label = Label(root, text=('Date', display_date))
     my_label.place(relx=0.0, rely=0.0, anchor='nw')
+
+
+    display_upcoming_event = check_events()
+    if len(display_upcoming_event[0]) == 0:
+        Label(root, text="No upcoming events").place(x=300, y=0)
+    if len(display_upcoming_event[0]) > 0:
+        upcoming_events_frame = LabelFrame(root, text="Upcoming Events")
+        upcoming_events_frame.place(x=290, y=170)
+        for event in display_upcoming_event[0]:
+            string = display_upcoming_event[0][display_upcoming_event[0].index(event)] + " in " + display_upcoming_event[1][display_upcoming_event[0].index(event)] + " Day(s)"
+            Label(upcoming_events_frame, text=string).pack()
 
     appointment_label = Label(root, text=('Create an Appointment/Event'))
     appointment_label.place(x=38, y=35)
@@ -356,7 +373,7 @@ def test_gui():
     entry_year.place(x=75, y=104)
     label_description = Label(root, text="Description")
     label_description.place(x=5, y=126)
-    entry_description = Entry(root)
+    entry_description = Entry(root)                                             # ToDo change to TextBox
     entry_description.insert(0, "Dennis 63th Bday")         # Preview Text
     entry_description.place(height=40 ,x=75, y=126)
     label_reminder = Label(root, text="Reminder")
@@ -424,7 +441,6 @@ def test_gui():
     root.iconbitmap('Apple_Calendar_Icon.ico')
     root.geometry("500x400")
     root.mainloop()
-
 
 test_gui()
 
