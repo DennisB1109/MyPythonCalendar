@@ -3,6 +3,7 @@ from datetime import timedelta
 from distutils.command import check
 from distutils.filelist import glob_to_re
 from msilib import type_binary
+from tkinter import messagebox
 from turtle import bgcolor, color
 from uuid import uuid1                                          # To assign each event a unique ID
 from openpyxl import load_workbook
@@ -239,13 +240,6 @@ def test_gui():
         description_value = entry_description.get()
         valid_reminder = True
         reminder_value = entry_reminder.get()
-
-        # After the Add Event button is pressed, the current entries get deleted
-        entry_day.delete(0, "end")
-        entry_month.delete(0, "end")
-        entry_year.delete(0, "end")
-        entry_description.delete(0, "end")
-        entry_reminder.delete(0, "end")
         
         if day_value == "":
             print("Invalid input")
@@ -300,7 +294,6 @@ def test_gui():
                 print("Invalid input")
                 valid_year = False
                 pass
-        print(f"Type of empty is: {type(year_value)} and value is: {year_value}")
         
         if reminder_value == "":
             reminder_value = "0"
@@ -308,34 +301,21 @@ def test_gui():
             try:
                 converted_character = int(character)
                 if converted_character not in range(0, 10):
-                    print("Invalid input year_value")
                     valid_reminder = False
             except ValueError:
-                print("Invalid input")
                 valid_reminder = False
                 pass
 
         if valid_day is True and valid_month is True and valid_year is True and valid_reminder is True:
             success_label = f'Your event "{description_value}" for the {day_value}.{month_value}.{year_value} was successfully added\nYou will get notified {reminder_value} days before'
-            nonlocal my_label_added_event
-            my_label_added_event.destroy()
-            nonlocal invalid_label
-            invalid_label.destroy()
-            my_label_added_event = Label(root, text=success_label)
-            my_label_added_event.place(x=5, y=225)
+            messagebox.showinfo("Event Added", success_label)
             add_event(day_value, month_value, year_value, description_value, reminder_value)
         else:
-            invalid_label.destroy()
-            my_label_added_event.destroy()
-            invalid_label = Label(root, text='Invalid Input')
-            invalid_label.place(x=5, y=225)
+            messagebox.showerror("Event could not be Added", "Invalid Input: Check your Entries again")
 
     def delete_an_entry():
         valid_id = True
         id_value = entry_id.get()
-
-        # After the Delete Event button is pressed, the current entries get deleted
-        entry_id.delete(0, "end")
 
         for character in id_value:
             try:
@@ -364,17 +344,9 @@ def test_gui():
                     temp_list.append(ws[get_column_letter(5) + str(row)].value)
                     break
             if temp_list == []:
-                nonlocal invalid_delete_label
-                invalid_delete_label.destroy()
-                nonlocal my_label_deleted_event
-                my_label_deleted_event.destroy()
-                invalid_delete_label = Label(root, text=f"Event with the id\n{id_value}\ncould not be found")
-                invalid_delete_label.place(x=390, y=120)
+                messagebox.showerror("Event could not be Deleted", f"Event with the id: {id_value}\ncould not be found")
             else:
-                invalid_delete_label.destroy()
-                my_label_deleted_event.destroy()
-                my_label_deleted_event = Label(root, text=f"Your event {temp_list[3]}\nfor the {temp_list[0]}.{temp_list[1]}.{temp_list[2]}\nwas successfully deleted")
-                my_label_deleted_event.place(x=350, y=120)
+                messagebox.showinfo("Event could not be Deleted", f"Your event {temp_list[3]}\nfor the {temp_list[0]}.{temp_list[1]}.{temp_list[2]}\nwas successfully deleted")
                 del_event(id_value)
             
 
