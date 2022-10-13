@@ -127,7 +127,24 @@ def show_all_events():
         #print(temp_list)
     return temp_list
 
-def check_events():
+def check_todays_events():
+    upcoming_event_description_list = []
+    wb = load_workbook('my_Events.xlsx')
+    ws = wb.active
+    for row in range(3, 100):
+        get_event_day = ws[get_column_letter(2) + str(row)].value
+        get_event_month = ws[get_column_letter(3) + str(row)].value
+        get_event_year = ws[get_column_letter(4) + str(row)].value
+        get_event_description = ws[get_column_letter(5) + str(row)].value
+        date_event_string = f'{get_event_year}-{get_event_month}-{get_event_day}'
+
+        temp_datetime_now = str(datetime.now())[:-16].strip()
+        if temp_datetime_now == date_event_string:
+            upcoming_event_description_list.append(get_event_description)
+    print(upcoming_event_description_list)
+    return upcoming_event_description_list
+
+def check_upcoming_events():
     """_summary_
 
     Returns:
@@ -156,7 +173,6 @@ def check_events():
         temp_datetime_now = str(datetime.now())[:-16].strip()
         
         if temp_datetime_now == remind_on_this_date:
-            print(f"{ws[get_column_letter(5) + str(row)].value} in {save_reminder} days")
             date_event_string = date_event_string[:len(date_event_string) - 9]
             date_event_string = date_event_string.replace(r"/", ".")
             upcoming_event_date_list.append(date_event_string)
@@ -173,16 +189,33 @@ def test_gui():
     my_label = Label(root, text=('Date', display_date))
     my_label.place(relx=0.0, rely=0.0, anchor='nw')
 
+    display_todays_event = check_todays_events()
+    upcoming_events_frame = LabelFrame(root, text="Todays Events")
+    upcoming_events_frame.place(width=300, height=100, x=200, y=200)
+    scrollbar_y = Scrollbar(upcoming_events_frame)
+    scrollbar_y.pack(side=RIGHT, fill=Y)
+    upcoming_events_text = Text(upcoming_events_frame, width = 15, height = 15, wrap = NONE,
+                yscrollcommand = scrollbar_y.set)
+    for event in display_todays_event:
+        string = display_todays_event[display_todays_event.index(event)] + "\n"
+        upcoming_events_text.insert(END, string)
+    upcoming_events_text.config(state=DISABLED)
+    upcoming_events_text.pack(side=TOP, fill=X)
+    scrollbar_y.config(command=upcoming_events_text.yview)
 
-    display_upcoming_event = check_events()
-    if len(display_upcoming_event[0]) == 0:
-        Label(root, text="No upcoming events").place(x=300, y=0)
-    if len(display_upcoming_event[0]) > 0:
-        upcoming_events_frame = LabelFrame(root, text="Upcoming Events")
-        upcoming_events_frame.place(x=290, y=170)
-        for event in display_upcoming_event[0]:
-            string = display_upcoming_event[0][display_upcoming_event[0].index(event)] + " in " + display_upcoming_event[1][display_upcoming_event[0].index(event)] + " Day(s)"
-            Label(upcoming_events_frame, text=string).pack()
+    display_upcoming_event = check_upcoming_events()
+    upcoming_events_frame = LabelFrame(root, text="Upcoming Events")
+    upcoming_events_frame.place(width=300, height=100, x=200, y=300)
+    scrollbar_y = Scrollbar(upcoming_events_frame)
+    scrollbar_y.pack(side=RIGHT, fill=Y)
+    upcoming_events_text = Text(upcoming_events_frame, width = 15, height = 15, wrap = NONE,
+                yscrollcommand = scrollbar_y.set)
+    for event in display_upcoming_event[0]:
+        string = display_upcoming_event[0][display_upcoming_event[0].index(event)] + " in " + display_upcoming_event[1][display_upcoming_event[0].index(event)] + " Day(s)\n"
+        upcoming_events_text.insert(END, string)
+    upcoming_events_text.config(state=DISABLED)
+    upcoming_events_text.pack(side=TOP, fill=X)
+    scrollbar_y.config(command=upcoming_events_text.yview)
 
     appointment_label = Label(root, text=('Create an Appointment/Event'))
     appointment_label.place(x=38, y=35)
