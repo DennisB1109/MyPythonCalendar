@@ -431,7 +431,7 @@ def test_gui():
 
     # Create Windows Notification
     input_from_textbox = upcoming_events_text.get("1.0", END)
-    if len(input_from_textbox) == 0:
+    if len(input_from_textbox) == 1:
         pass
     else:
         toast = Notification(app_id="myNotification",
