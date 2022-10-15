@@ -1,16 +1,21 @@
+import imp
+import sys
+from os import path
+
 from datetime import *
 from datetime import timedelta
-from distutils.command import check
-from distutils.filelist import glob_to_re
-from msilib import type_binary
-from tkinter import messagebox
-from turtle import bgcolor, color
+
 from uuid import uuid1                                          # To assign each event a unique ID
+
 from openpyxl import load_workbook
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
-import sys
+
+from tkinter import messagebox
 from tkinter import *
+
+import time
+from winotify import Notification, audio
 
 print("LETS GET STARTED\n")
 
@@ -63,22 +68,15 @@ def add_event(day: str, month: str, year: str, description: str, reminder: str):
     """
     wb = load_workbook('my_Events.xlsx')
     ws = wb.active
-    print("Create an Appointment/Event\n")
     uid = str(uuid1().int>>64)
-    #day = input("Day: ")
-    #month = input("Month: ")
-    #year = input("Year: ")
     if len(year) == 2:
         temp = str(datetime.now().year)
         century = temp[0] + temp[1] + year
         temp = ''.join(century)
         year = temp
-    #description = input("Description: ")
-    #reminder = int(input("How many days before, do you want to get notified?: "))
     ws.append([uid, day, month, year, description, reminder])
     wb.save('my_Events.xlsx')
     added_event = f"Your event for the {day}.{month}.{year} was successfully added to your Calendar"
-    print(added_event)
     return added_event
 
 def del_event(uid: str):
@@ -89,8 +87,6 @@ def del_event(uid: str):
     """
     wb = load_workbook('my_Events.xlsx')
     ws = wb.active
-    print("Which event should be deleted?\n")
-    #uid = input("UniqueID: ")
     temp_list = []
     was_event_deleted = False
     for row in range(2,100):
@@ -105,8 +101,6 @@ def del_event(uid: str):
             wb.save('my_Events.xlsx')
             was_event_deleted = True
             break
-    if was_event_deleted is False:
-        print(f"There is no event with the ID {uid}")
     return uid
 
 def show_all_events():
@@ -122,10 +116,8 @@ def show_all_events():
         check_empty = ws[get_column_letter(1) + str(row)].value
         if check_empty is None:
             break
-        #temp_list.clear()
         for col in range(1,7):
             temp_list.append(ws[get_column_letter(col) + str(row)].value)
-        #print(temp_list)
     return temp_list
 
 def check_todays_events():
@@ -142,7 +134,6 @@ def check_todays_events():
         temp_datetime_now = str(datetime.now())[:-16].strip()
         if temp_datetime_now == date_event_string:
             upcoming_event_description_list.append(get_event_description)
-    print(upcoming_event_description_list)
     return upcoming_event_description_list
 
 def check_upcoming_events():
@@ -245,53 +236,39 @@ def test_gui():
             print("Invalid input")
             valid_day = False
         for character in day_value:
-            print("Reached loop")
             try:
                 converted_character = int(character)
                 if converted_character not in range(0, 10) or int(day_value) > 31:
-                    print("Invalid input")
                     valid_day = False
                 if len(day_value) > 2:
-                    print("Length Error")
-                    print("Invalid input")
                     valid_day = False
             except ValueError:
-                print("Value Error")
-                print("Invalid input")
                 valid_day = False
                 pass
         
         if month_value == "":
-            print("Invalid input")
             valid_month = False
         for character in month_value:
             try:
                 converted_character = int(character)
                 if converted_character not in range(0, 10) or int(month_value) > 12:
-                    print("Invalid input month_value")
                     valid_month = False
                 if len(month_value) > 2 or len(month_value) == 0 or month_value is None:
-                    print("Invalid input")
                     valid_month = False
             except ValueError:
-                print("Invalid input")
                 valid_month = False
                 pass
         
         if year_value == "":
-            print("Invalid input")
             valid_year = False
         for character in year_value:
             try:
                 converted_character = int(character)
                 if converted_character not in range(0, 10):
-                    print("Invalid input year_value")
                     valid_year = False
                 if len(year_value) > 4 or len(year_value) < 2 or len(year_value) == 3 or len(year_value) == 0 or not year_value:
-                    print("Invalid input")
                     valid_year = False
             except ValueError:
-                print("Invalid input")
                 valid_year = False
                 pass
         
@@ -321,10 +298,8 @@ def test_gui():
             try:
                 converted_character = int(character)
                 if converted_character not in range(0, 10):
-                    print("Invalid input")
                     valid_id = False
             except ValueError:
-                print("Invalid input")
                 valid_day = False
                 pass
 
@@ -433,14 +408,39 @@ def test_gui():
         events = show_all_events()
         num_of_events = len(events)//6
         event_dict = {}
+        all_events_frame = Frame(event_window, width=800, height=500)
+        all_events_frame.pack(fill=BOTH, expand=1)
+        all_events_canvas = Canvas(all_events_frame, width=800, height=500)
+        all_events_canvas.pack(side=LEFT, fill=BOTH, expand=1)
+        scrollbar_y = Scrollbar(all_events_frame, orient=VERTICAL, command=all_events_canvas.yview)
+        scrollbar_y.pack(side=RIGHT, fill=Y)
+        all_events_canvas.configure(yscrollcommand=scrollbar_y.set)
+        all_events_canvas.bind('<Configure>', lambda e: all_events_canvas.configure(scrollregion=all_events_canvas.bbox("all")))
+        all_events = Text(all_events_canvas, width=800, height=500)
         for event in range(1, num_of_events+1):
-            temp = str("ID: " + events[0]) + "  Day: " + str(events[1]) + "  Month: " + str(events[2]) + "  Year: " + str(events[3]) + "  Description: " + str(events[4]) + "  Reminder: " + str(events[5])
+            temp = str("ID: " + events[0]) + "  Day: " + str(events[1]) + "  Month: " + str(events[2]) + "  Year: " + str(events[3]) + "  Description: " + str(events[4]) + "  Reminder: " + str(events[5] + "\n")
             del events[:6]
-            event_dict[f"Event{0}".format(event)] = Label(event_window, text=temp)
-            event_dict[f"Event{0}".format(event)].pack()
+            all_events.insert(END, temp)
+        all_events.config(state=DISABLED)
+        all_events.pack(side=TOP, fill=X)
+        all_events_canvas.create_window((0,0), window=all_events, anchor="nw")
+        #scrollbar_y.config(all_events.yview)
 
     show_events_button = Button(root, text="Show all events", padx=8, pady=3, command=show_events)
     show_events_button.place(x=20, y=300)
+
+    # Create Windows Notification
+    input_from_textbox = upcoming_events_text.get("1.0", END)
+    if len(input_from_textbox) == 0:
+        pass
+    else:
+        toast = Notification(app_id="myNotification",
+                        title="You Have Upcoming Events!:",
+                        msg=input_from_textbox,
+                        duration="long",
+                        icon=path.abspath(r"Apple_Calendar_Icon.ico"))
+        toast.set_audio(audio.Default, loop=False)
+        toast.show()
 
     root.title('Calendar')
     root.iconbitmap('Apple_Calendar_Icon.ico')
