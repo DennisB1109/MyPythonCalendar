@@ -67,7 +67,7 @@ def add_event(day: str, month: str, year: str, description: str, reminder: str):
         _type_: _description_
     """
     wb = load_workbook('my_Events.xlsx')
-    ws = wb.active
+    ws = wb["all_Events"]
     uid = str(uuid1().int>>64)
     if len(year) == 2:
         temp = str(datetime.now().year)
@@ -86,7 +86,7 @@ def del_event(uid: str):
         _type_: _description_
     """
     wb = load_workbook('my_Events.xlsx')
-    ws = wb.active
+    ws = wb["all_Events"]
     temp_list = []
     was_event_deleted = False
     for row in range(2,100):
@@ -110,7 +110,7 @@ def show_all_events():
         _type_: _description_
     """
     wb = load_workbook('my_Events.xlsx')
-    ws = wb.active    
+    ws = wb["all_Events"]    
     temp_list = []
     for row in range(3,100):
         check_empty = ws[get_column_letter(1) + str(row)].value
@@ -123,7 +123,7 @@ def show_all_events():
 def check_todays_events():
     upcoming_event_description_list = []
     wb = load_workbook('my_Events.xlsx')
-    ws = wb.active
+    ws = wb["all_Events"]
     for row in range(3, 100):
         get_event_day = ws[get_column_letter(2) + str(row)].value
         get_event_month = ws[get_column_letter(3) + str(row)].value
@@ -146,7 +146,7 @@ def check_upcoming_events():
     upcoming_event_description_list = []
     upcoming_event_reminder_list = []
     wb = load_workbook('my_Events.xlsx')
-    ws = wb.active
+    ws = wb["all_Events"]
     for row in range(3, 100):
         save_reminder = ws[get_column_letter(6) + str(row)].value
         if save_reminder is None:
@@ -305,7 +305,7 @@ def test_gui():
 
         if valid_id is True:
             wb = load_workbook('my_Events.xlsx')
-            ws = wb.active
+            ws = wb["all_Events"]
             temp_list = []
             for row in range(3,100):
                 check_id = ws[get_column_letter(1) + str(row)].value
