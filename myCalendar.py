@@ -1,6 +1,8 @@
-import imp
-import sys
+from cgitb import text
+from http.server import executable
+from os import system
 from os import path
+
 
 from datetime import *
 from datetime import timedelta
@@ -172,7 +174,7 @@ def check_upcoming_events():
             upcoming_event_reminder_list.append(save_reminder)
     return upcoming_event_description_list, upcoming_event_reminder_list
 
-def test_gui():
+def calendar_gui():
     """_summary_
     """
     root = Tk()
@@ -181,33 +183,37 @@ def test_gui():
     my_label = Label(root, text=('Date', display_date))
     my_label.place(relx=0.0, rely=0.0, anchor='nw')
 
-    display_todays_event = check_todays_events()
-    upcoming_events_frame = LabelFrame(root, text="Todays Events")
-    upcoming_events_frame.place(width=300, height=100, x=200, y=200)
-    scrollbar_y = Scrollbar(upcoming_events_frame)
-    scrollbar_y.pack(side=RIGHT, fill=Y)
-    upcoming_events_text = Text(upcoming_events_frame, width = 15, height = 15, wrap = NONE,
-                yscrollcommand = scrollbar_y.set)
-    for event in display_todays_event:
-        string = display_todays_event[display_todays_event.index(event)] + "\n"
-        upcoming_events_text.insert(END, string)
-    upcoming_events_text.config(state=DISABLED)
-    upcoming_events_text.pack(side=TOP, fill=X)
-    scrollbar_y.config(command=upcoming_events_text.yview)
+    def displayed_events():
+        display_todays_event = check_todays_events()
+        todays_events_frame = LabelFrame(root, text="Todays Events")
+        todays_events_frame.place(width=300, height=100, x=200, y=200)
+        scrollbar_y = Scrollbar(todays_events_frame)
+        scrollbar_y.pack(side=RIGHT, fill=Y)
+        todays_events_text = Text(todays_events_frame, width = 15, height = 15, wrap = NONE,
+                    yscrollcommand = scrollbar_y.set)
+        for event in display_todays_event:
+            string = display_todays_event[display_todays_event.index(event)] + "\n"
+            todays_events_text.insert(END, string)
+        todays_events_text.config(state=DISABLED)
+        todays_events_text.pack(side=TOP, fill=X)
+        scrollbar_y.config(command=todays_events_text.yview)
 
-    display_upcoming_event = check_upcoming_events()
-    upcoming_events_frame = LabelFrame(root, text="Upcoming Events")
-    upcoming_events_frame.place(width=300, height=100, x=200, y=300)
-    scrollbar_y = Scrollbar(upcoming_events_frame)
-    scrollbar_y.pack(side=RIGHT, fill=Y)
-    upcoming_events_text = Text(upcoming_events_frame, width = 15, height = 15, wrap = NONE,
-                yscrollcommand = scrollbar_y.set)
-    for event in display_upcoming_event[0]:
-        string = display_upcoming_event[0][display_upcoming_event[0].index(event)] + " in " + display_upcoming_event[1][display_upcoming_event[0].index(event)] + " Day(s)\n"
-        upcoming_events_text.insert(END, string)
-    upcoming_events_text.config(state=DISABLED)
-    upcoming_events_text.pack(side=TOP, fill=X)
-    scrollbar_y.config(command=upcoming_events_text.yview)
+        display_upcoming_event = check_upcoming_events()
+        upcoming_events_frame = LabelFrame(root, text="Upcoming Events")
+        upcoming_events_frame.place(width=300, height=100, x=200, y=300)
+        scrollbar_y = Scrollbar(upcoming_events_frame)
+        scrollbar_y.pack(side=RIGHT, fill=Y)
+        upcoming_events_text = Text(upcoming_events_frame, width = 15, height = 15, wrap = NONE,
+                    yscrollcommand = scrollbar_y.set)
+        for event in display_upcoming_event[0]:
+            string = display_upcoming_event[0][display_upcoming_event[0].index(event)] + " in " + display_upcoming_event[1][display_upcoming_event[0].index(event)] + " Day(s)\n"
+            upcoming_events_text.insert(END, string)
+        upcoming_events_text.config(state=DISABLED)
+        upcoming_events_text.pack(side=TOP, fill=X)
+        scrollbar_y.config(command=upcoming_events_text.yview)
+        return upcoming_events_text
+    
+    displayed_events()
 
     appointment_label = Label(root, text=('Create an Appointment/Event'))
     appointment_label.place(x=38, y=35)
@@ -324,7 +330,6 @@ def test_gui():
                 messagebox.showinfo("Event could not be Deleted", f"Your event {temp_list[3]}\nfor the {temp_list[0]}.{temp_list[1]}.{temp_list[2]}\nwas successfully deleted")
                 del_event(id_value)
             
-
     def event_text(e):
         entry_day.delete(0, "end")
         entry_month.delete(0, "end")
@@ -383,9 +388,19 @@ def test_gui():
         mini_calendar_window.bind('<FocusOut>', lossfocus)
 
     input_date_btn = Button(root)
-    photo = PhotoImage(file="calendar_button.png")
-    input_date_btn.config(image= photo, width= "17", height= "16", activeforeground= "black", bg= "black", bd=0, command=input_date_menu)
+    photo_calender = PhotoImage(file="calendar_button.png")
+    input_date_btn.config(image= photo_calender, width= "17", height= "16", activeforeground= "black", bg= "black", bd=0, command=input_date_menu)
     input_date_btn.place(x=205, y=105)
+
+    def refresh_events():
+        """_summary_
+        """
+        displayed_events()
+
+    refresh_button = Button(root)
+    photo_refresh = PhotoImage(file="Refresh_icon.png")
+    refresh_button.config(image= photo_refresh, width="14", height="15", activeforeground= "black", bg= "black", bd=0, command=refresh_events)
+    refresh_button.place(x=480, y=0)
 
 
     # Form to delete an Event
@@ -426,10 +441,17 @@ def test_gui():
         all_events_canvas.create_window((0,0), window=all_events, anchor="nw")
         #scrollbar_y.config(all_events.yview)
 
-    show_events_button = Button(root, text="Show all events", padx=8, pady=3, command=show_events)
-    show_events_button.place(x=20, y=300)
+    show_all_events_button = Button(root, text="Show all events", padx=8, pady=3, command=show_events)
+    show_all_events_button.place(width=155,x=20, y=260)
+
+    show_upcoming_events_button = Button(root, text="Show upcoming events", padx=8, pady=3, command=show_events)
+    show_upcoming_events_button.place(width=155, x=20, y=292)
+
+    show_past_events_button = Button(root, text="Show past events", padx=8, pady=3, command=show_events)
+    show_past_events_button.place(width=155, x=20, y=324)
 
     # Create Windows Notification
+    upcoming_events_text = displayed_events()
     input_from_textbox = upcoming_events_text.get("1.0", END)
     if len(input_from_textbox) == 1:
         pass
@@ -447,7 +469,7 @@ def test_gui():
     root.geometry("500x400")
     root.mainloop()
 
-test_gui()
+calendar_gui()
 
 # if (__name__ == "__main__"):
 #      main()
