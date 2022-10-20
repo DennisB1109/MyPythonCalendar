@@ -174,6 +174,95 @@ def check_upcoming_events():
             upcoming_event_reminder_list.append(save_reminder)
     return upcoming_event_description_list, upcoming_event_reminder_list
 
+def write_past_events():
+    wb = load_workbook('my_Events.xlsx')
+    ws_all_events = wb["all_Events"]
+    ws_past_events = wb["past_Events"]
+    ws_past_events.delete_rows(3, 100)
+    wb.save('my_Events.xlsx')
+    
+    for row in range(3, 100):
+        if ws_all_events[get_column_letter(1) + str(row)].value is None:
+            break
+        get_event_id = ws_all_events[get_column_letter(1) + str(row)].value
+        get_event_day = ws_all_events[get_column_letter(2) + str(row)].value
+        get_event_month = ws_all_events[get_column_letter(3) + str(row)].value
+        get_event_year = ws_all_events[get_column_letter(4) + str(row)].value[2] + ws_all_events[get_column_letter(4) + str(row)].value[3]
+        get_event_description = ws_all_events[get_column_letter(5) + str(row)].value
+        get_event_reminder = ws_all_events[get_column_letter(6) + str(row)].value
+        
+        date_event_string = f'{get_event_day}/{get_event_month}/{get_event_year} 00:00:01'
+        date_time_obj = datetime.strptime(date_event_string, '%d/%m/%y %H:%M:%S')
+        
+        curr_date = datetime.now()
+
+        if date_time_obj < curr_date:
+            ws_past_events.append([get_event_id, get_event_day, get_event_month, get_event_year, get_event_description, get_event_reminder])
+            wb.save('my_Events.xlsx')
+
+def show_past_events() -> list:
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
+    wb = load_workbook('my_Events.xlsx')
+    ws = wb["past_Events"]
+    temp_list = []
+    for row in range(3,100):
+        check_empty = ws[get_column_letter(1) + str(row)].value
+        if check_empty is None:
+            break
+        for col in range(1,7):
+            temp_list.append(ws[get_column_letter(col) + str(row)].value)
+    print(temp_list)
+    return temp_list
+
+def write_upcoming_events():
+    wb = load_workbook('my_Events.xlsx')
+    ws_all_events = wb["all_Events"]
+    ws_upcoming_events = wb["upcoming_Events"]
+    ws_upcoming_events.delete_rows(3, 100)
+    wb.save('my_Events.xlsx')
+    
+    for row in range(3, 100):
+        if ws_all_events[get_column_letter(1) + str(row)].value is None:
+            break
+        get_event_id = ws_all_events[get_column_letter(1) + str(row)].value
+        get_event_day = ws_all_events[get_column_letter(2) + str(row)].value
+        get_event_month = ws_all_events[get_column_letter(3) + str(row)].value
+        get_event_year = ws_all_events[get_column_letter(4) + str(row)].value[2] + ws_all_events[get_column_letter(4) + str(row)].value[3]
+        get_event_description = ws_all_events[get_column_letter(5) + str(row)].value
+        get_event_reminder = ws_all_events[get_column_letter(6) + str(row)].value
+        
+        date_event_string = f'{get_event_day}/{get_event_month}/{get_event_year} 00:00:01'
+        date_time_obj = datetime.strptime(date_event_string, '%d/%m/%y %H:%M:%S')
+        
+        curr_date = datetime.now()
+
+        if date_time_obj >= curr_date:
+            ws_upcoming_events.append([get_event_id, get_event_day, get_event_month, get_event_year, get_event_description, get_event_reminder])
+            wb.save('my_Events.xlsx')
+
+def show_upcoming_events() -> list:
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
+    wb = load_workbook('my_Events.xlsx')
+    ws = wb["upcoming_Events"]
+    temp_list = []
+    for row in range(3,100):
+        check_empty = ws[get_column_letter(1) + str(row)].value
+        if check_empty is None:
+            break
+        for col in range(1,7):
+            temp_list.append(ws[get_column_letter(col) + str(row)].value)
+    print(temp_list)
+    return temp_list
+
+            
 def calendar_gui():
     """_summary_
     """
@@ -422,7 +511,6 @@ def calendar_gui():
         
         events = show_all_events()
         num_of_events = len(events)//6
-        event_dict = {}
         all_events_frame = Frame(event_window, width=800, height=500)
         all_events_frame.pack(fill=BOTH, expand=1)
         all_events_canvas = Canvas(all_events_frame, width=800, height=500)
@@ -439,15 +527,62 @@ def calendar_gui():
         all_events.config(state=DISABLED)
         all_events.pack(side=TOP, fill=X)
         all_events_canvas.create_window((0,0), window=all_events, anchor="nw")
-        #scrollbar_y.config(all_events.yview)
+
+    def past_events():
+        event_window = Toplevel()
+        event_window.title('Calendar/Events')
+        event_window.iconbitmap('Apple_Calendar_Icon.ico')
+        
+        events = show_past_events()
+        num_of_events = len(events)//6
+        past_events_frame = Frame(event_window, width=800, height=500)
+        past_events_frame.pack(fill=BOTH, expand=1)
+        past_events_canvas = Canvas(past_events_frame, width=800, height=500)
+        past_events_canvas.pack(side=LEFT, fill=BOTH, expand=1)
+        scrollbar_y = Scrollbar(past_events_frame, orient=VERTICAL, command=past_events_canvas.yview)
+        scrollbar_y.pack(side=RIGHT, fill=Y)
+        past_events_canvas.configure(yscrollcommand=scrollbar_y.set)
+        past_events_canvas.bind('<Configure>', lambda e: past_events_canvas.configure(scrollregion=past_events_canvas.bbox("all")))
+        past_events = Text(past_events_canvas, width=800, height=500)
+        for event in range(1, num_of_events+1):
+            temp = str("ID: " + events[0]) + "  Day: " + str(events[1]) + "  Month: " + str(events[2]) + "  Year: " + str(events[3]) + "  Description: " + str(events[4]) + "  Reminder: " + str(events[5] + "\n")
+            del events[:6]
+            past_events.insert(END, temp)
+        past_events.config(state=DISABLED)
+        past_events.pack(side=TOP, fill=X)
+        past_events_canvas.create_window((0,0), window=past_events, anchor="nw")
+
+    def upcoming_events():
+        event_window = Toplevel()
+        event_window.title('Calendar/Events')
+        event_window.iconbitmap('Apple_Calendar_Icon.ico')
+        
+        events = show_upcoming_events()
+        num_of_events = len(events)//6
+        upcoming_events_frame = Frame(event_window, width=800, height=500)
+        upcoming_events_frame.pack(fill=BOTH, expand=1)
+        upcoming_events_canvas = Canvas(upcoming_events_frame, width=800, height=500)
+        upcoming_events_canvas.pack(side=LEFT, fill=BOTH, expand=1)
+        scrollbar_y = Scrollbar(upcoming_events_frame, orient=VERTICAL, command=upcoming_events_canvas.yview)
+        scrollbar_y.pack(side=RIGHT, fill=Y)
+        upcoming_events_canvas.configure(yscrollcommand=scrollbar_y.set)
+        upcoming_events_canvas.bind('<Configure>', lambda e: upcoming_events_canvas.configure(scrollregion=upcoming_events_canvas.bbox("all")))
+        upcoming_events = Text(upcoming_events_canvas, width=800, height=500)
+        for event in range(1, num_of_events+1):
+            temp = str("ID: " + events[0]) + "  Day: " + str(events[1]) + "  Month: " + str(events[2]) + "  Year: " + str(events[3]) + "  Description: " + str(events[4]) + "  Reminder: " + str(events[5] + "\n")
+            del events[:6]
+            upcoming_events.insert(END, temp)
+        upcoming_events.config(state=DISABLED)
+        upcoming_events.pack(side=TOP, fill=X)
+        upcoming_events_canvas.create_window((0,0), window=upcoming_events, anchor="nw")
 
     show_all_events_button = Button(root, text="Show all events", padx=8, pady=3, command=show_events)
     show_all_events_button.place(width=155,x=20, y=260)
 
-    show_upcoming_events_button = Button(root, text="Show upcoming events", padx=8, pady=3, command=show_events)
+    show_upcoming_events_button = Button(root, text="Show upcoming events", padx=8, pady=3, command=upcoming_events)
     show_upcoming_events_button.place(width=155, x=20, y=292)
 
-    show_past_events_button = Button(root, text="Show past events", padx=8, pady=3, command=show_events)
+    show_past_events_button = Button(root, text="Show past events", padx=8, pady=3, command=past_events)
     show_past_events_button.place(width=155, x=20, y=324)
 
     # Create Windows Notification
@@ -469,6 +604,8 @@ def calendar_gui():
     root.geometry("500x400")
     root.mainloop()
 
+write_past_events()
+write_upcoming_events()
 calendar_gui()
 
 # if (__name__ == "__main__"):
