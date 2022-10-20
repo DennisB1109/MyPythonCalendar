@@ -424,48 +424,32 @@ def calendar_gui():
             else:
                 messagebox.showinfo("Event could not be Deleted", f"Your event {temp_list[3]}\nfor the {temp_list[0]}.{temp_list[1]}.{temp_list[2]}\nwas successfully deleted")
                 del_event(id_value)
-            
-    def event_text(e):
-        entry_day.delete(0, "end")
-        entry_month.delete(0, "end")
-        entry_year.delete(0, "end")
-        entry_description.delete(0, "end")
-        entry_reminder.delete(0, "end")
     
-    def delete_text(e):
-        entry_id.delete(0, "end")
 
     # Form to create an Event
     label_day = Label(root, text="Day")
     label_day.place(x=5, y=60)
     entry_day = Entry(root)
-    entry_day.insert(0,"11")                                # Preview Text
     entry_day.place(x=75, y=60)
     label_month = Label(root, text="Month")
     label_month.place(x=5, y=82)
     entry_month = Entry(root)
-    entry_month.insert(0, "09")                             # Preview Text
     entry_month.place(x=75, y=82)
     label_year = Label(root, text="Year")
     label_year.place(x=5, y=104)
     entry_year = Entry(root)
-    entry_year.insert(0, "2064")                            # Preview Text
     entry_year.place(x=75, y=104)
     label_description = Label(root, text="Description")
     label_description.place(x=5, y=126)
     entry_description = Entry(root)                                             # ToDo change to TextBox
-    entry_description.insert(0, "Dennis 63th Bday")         # Preview Text
     entry_description.place(height=40 ,x=75, y=126)
     label_reminder = Label(root, text="Reminder")
     label_reminder.place(x=5, y=168)
     entry_reminder = Entry(root)
-    entry_reminder.insert(0, "5")                           # Preview Text
     entry_reminder.place(width=40, x=75, y= 168)
 
     submit_event = Button(root, text="Add Event", padx=8, pady=3, command=do_an_entry)
     submit_event.place(x=75, y=193)
-
-    entry_day.bind("<FocusIn>", event_text)
 
     def input_date_menu():
         if 'normal' == mini_calendar_window.state():
@@ -517,13 +501,10 @@ def calendar_gui():
     label_id = Label(root, text="Event ID")
     label_id.place(x=320, y=60)
     entry_id = Entry(root)
-    entry_id.insert(0,"3067211771744094029")                                # Preview Text
     entry_id.place(x=370, y=60)
 
     submit_delete = Button(root, text="Delete Event", padx=8, pady=3, command=delete_an_entry)
     submit_delete.place(x=400, y=85)
-
-    entry_id.bind("<FocusIn>", delete_text)
 
     def show_events():
         event_window = Toplevel()
