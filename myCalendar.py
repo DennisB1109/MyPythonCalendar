@@ -1,3 +1,4 @@
+from calendar import month
 from cgitb import text
 from http.server import executable
 from os import system
@@ -6,6 +7,7 @@ from os import path
 
 from datetime import *
 from datetime import timedelta
+from sre_parse import State
 
 from uuid import uuid1                                          # To assign each event a unique ID
 
@@ -15,6 +17,7 @@ from openpyxl.utils import get_column_letter
 
 from tkinter import messagebox
 from tkinter import *
+from tkcalendar import *
 
 import time
 from winotify import Notification, audio
@@ -316,6 +319,9 @@ def calendar_gui():
     invalid_delete_label = Label(root)
     my_label_deleted_event = Label(root)
 
+    mini_calendar_window = Toplevel()
+    mini_calendar_window.withdraw()
+
     def do_an_entry():
         valid_day = True
         day_value = entry_day.get()
@@ -460,21 +466,36 @@ def calendar_gui():
     submit_event.place(x=75, y=193)
 
     entry_day.bind("<FocusIn>", event_text)
-    
-    def lossfocus(event):
-        if event.widget is root:
-            w = Toplevel.tk.call('focus')
-            if not w:
-                Toplevel.destroy()
 
     def input_date_menu():
-        mini_calendar_window = Toplevel()
-        mini_calendar_temp_label = Label(mini_calendar_window, text="Menu")
-        mini_calendar_temp_label.pack()
-        mini_calendar_window.geometry("150x180")
-        mini_calendar_window.overrideredirect(True)
+        if 'normal' == mini_calendar_window.state():
+            mini_calendar_window.withdraw()
+        else:
+            mini_calendar_window.deiconify()
+            mini_calendar_temp_label = Calendar(mini_calendar_window, selectmode="day", year=2022, month=10, day=20)
+            mini_calendar_temp_label.pack()
+            mini_calendar_window.geometry("250x212")
+            mini_calendar_window.overrideredirect(True)
 
-        mini_calendar_window.bind('<FocusOut>', lossfocus)
+            def grab_date():
+                selected_date = mini_calendar_temp_label.get_date()
+                selected_day = selected_date[0] + selected_date[1]
+                selected_month = selected_date[3] + selected_date[4]
+                selected_year = selected_date[6] + selected_date[7]
+
+                entry_day.delete(0,'end')
+                entry_month.delete(0,'end')
+                entry_year.delete(0,'end')
+                entry_day.insert(0,selected_day)
+                entry_month.insert(0,selected_month)
+                entry_year.insert(0,selected_year)
+
+            Button(mini_calendar_window, text="get Date", command=grab_date).place(width=250, x=0, y=186)
+
+            myLabel_test = Label(mini_calendar_window, text="")
+            myLabel_test.pack(pady=20)
+
+
 
     input_date_btn = Button(root)
     photo_calender = PhotoImage(file="calendar_button.png")
